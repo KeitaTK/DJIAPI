@@ -1,0 +1,16 @@
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Virtual environment
+../DJIAPI-venv/
+
+# SQLite database
+db.sqlite3
+
+# Django static files ( collected )
+static/
+
+# IDE/editor folders
+.vscode/
+.idea/
