@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>DJI Cloud API Status</title>
+</head>
+<body>
+  <h1>DJI Cloud API 接続ステータス</h1>
+  <p>最終確認時刻: {{ status.timestamp }}</p>
+
+  <h2>アクセストークン情報</h2>
+  {% if status.expires_at %}
+    <p>有効期限: {{ status.expires_at }}</p>
+    <p>トークン有効状況: 
+       {% if status.token_valid %}
+         <strong style="color:green;">有効</strong>
+       {% else %}
+         <strong style="color:red;">無効</strong>
+       {% endif %}
+    </p>
+  {% else %}
+    <p style="color:red;">トークン情報が見つかりません。</p>
+  {% endif %}
+
+  <h2>テストAPIコール結果</h2>
+  {% if status.ping_success %}
+    <p style="color:green;">正常に応答を受信しました。</p>
+  {% else %}
+    <p style="color:red;">エラー: {{ status.ping_error }}</p>
+  {% endif %}
+
+  <p><a href="{% url 'dji_api:status' %}">再試行</a></p>
+</body>
+</html>
