@@ -11,7 +11,7 @@ from .models import DJICloudToken, UserDJICredentials
 # 開発環境: InsecureRequestWarning を抑制
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-API_BASE = 'https://api.djicloud.com/v1'
+API_BASE = 'https://api.dji.com/v1'
 
 class TLS12Adapter(HTTPAdapter):
     """
