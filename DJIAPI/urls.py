@@ -14,9 +14,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+# dji_api/urls.py
 from django.urls import path
+from . import views
 
+app_name = 'dji_api'
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('status/', views.status_page, name='status'),
+    # 他のURL定義…
 ]
