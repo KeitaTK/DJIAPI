@@ -8,28 +8,30 @@ from urllib3.util.ssl_ import create_urllib3_context
 from django.utils import timezone
 from .models import DJICloudToken, UserDJICredentials
 
-# 警告抑制（開発環境限定）
+# 開発環境: InsecureRequestWarning を抑制
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 API_BASE = 'https://api.djicloud.com/v1'
 
 class TLS12Adapter(HTTPAdapter):
     """
-    TLS1.2 を強制使用するための HTTPAdapter
+    TLS1.2 固定かつホスト名チェック無効化の Adapter
     """
     def init_poolmanager(self, *args, **kwargs):
+        # TLS1.2 以上のみ許可
         ctx = create_urllib3_context()
-        # TLSv1.2 以上のみ許可
         ctx.options |= ssl.OP_NO_TLSv1 | ssl.OP_NO_TLSv1_1
+        # ホスト名チェックと証明書検証を無効化
+        ctx.check_hostname = False
+        ctx.verify_mode    = ssl.CERT_NONE
         kwargs['ssl_context'] = ctx
         return super().init_poolmanager(*args, **kwargs)
 
 def get_session():
     """
-    TLS1.2 固定の Session を返す
+    TLS12Adapter を使ったセッションを返す
     """
     session = requests.Session()
-    # HTTPS 全般に対して TLS12Adapter を適用
     session.mount('https://', TLS12Adapter())
     return session
 
@@ -41,12 +43,8 @@ def refresh_user_token(user):
         'grant_type': 'client_credentials',
     }
     session = get_session()
-    # verify=False も併用して検証を無効化（開発環境限定）
-    res = session.post(
-        f'{API_BASE}/oauth/token',
-        json=payload,
-        verify=False,
-    )
+    # verify=False は不要になりました
+    res = session.post(f'{API_BASE}/oauth/token', json=payload)
     res.raise_for_status()
     data = res.json()
 
@@ -61,12 +59,7 @@ def ping_cloud_api(user):
     token_obj = refresh_user_token(user)
     headers   = {'Authorization': f'Bearer {token_obj.access_token}'}
     session = get_session()
-    res = session.get(
-        f'{API_BASE}/devices',
-        headers=headers,
-        timeout=5,
-        verify=False,
-    )
+    res = session.get(f'{API_BASE}/devices', headers=headers, timeout=5)
     res.raise_for_status()
     return {
         'ping_success': True,
